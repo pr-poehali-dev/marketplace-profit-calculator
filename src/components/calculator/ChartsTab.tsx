@@ -162,6 +162,12 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
                 ),
               },
               {
+                metric: 'ROI',
+                ...Object.fromEntries(
+                  selectedCalcs.map((calc, idx) => [calc.productName, calc.roi])
+                ),
+              },
+              {
                 metric: 'Прибыль',
                 ...Object.fromEntries(
                   selectedCalcs.map((calc, idx) => [
