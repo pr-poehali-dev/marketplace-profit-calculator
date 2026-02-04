@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
-import { useTelegramAuth } from '@/components/extensions/telegram-bot/useTelegramAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { ProductData, CalculationResult } from '@/components/calculator/types';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
@@ -117,14 +117,7 @@ const Index = () => {
   };
 
   const navigate = useNavigate();
-  const auth = useTelegramAuth({
-    apiUrls: {
-      callback: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=callback',
-      refresh: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=refresh',
-      logout: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=logout',
-    },
-    botUsername: 'FinPlace_2087_bot',
-  });
+  const auth = useAuth();
 
   const handleLogout = async () => {
     await auth.logout();

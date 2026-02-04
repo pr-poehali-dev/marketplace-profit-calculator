@@ -8,19 +8,12 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import TelegramCallback from "./pages/TelegramCallback";
 import NotFound from "./pages/NotFound";
-import { useTelegramAuth } from "@/components/extensions/telegram-bot/useTelegramAuth";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const auth = useTelegramAuth({
-    apiUrls: {
-      callback: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=callback',
-      refresh: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=refresh',
-      logout: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=logout',
-    },
-    botUsername: 'FinPlace_2087_bot',
-  });
+  const auth = useAuth();
 
   if (auth.isLoading) {
     return (
@@ -48,20 +41,22 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/telegram/callback" element={<TelegramCallback />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/telegram/callback" element={<TelegramCallback />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

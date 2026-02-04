@@ -2,22 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
-import { useTelegramAuth } from '@/components/extensions/telegram-bot/useTelegramAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TelegramCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState('');
-
-  const auth = useTelegramAuth({
-    apiUrls: {
-      callback: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=callback',
-      refresh: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=refresh',
-      logout: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=logout',
-    },
-    botUsername: 'FinPlace_2087_bot',
-  });
+  const auth = useAuth();
 
   useEffect(() => {
     const token = searchParams.get('token');
