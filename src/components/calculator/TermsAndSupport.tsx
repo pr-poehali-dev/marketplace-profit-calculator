@@ -1,0 +1,45 @@
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
+
+const terms = [
+  { term: 'Маржинальность', description: 'Процент чистой прибыли от выручки' },
+  { term: 'Валовая прибыль', description: 'Выручка минус себестоимость товара' },
+  { term: 'Чистая прибыль', description: 'Выручка минус все затраты и налоги' },
+  { term: '% выкупа', description: 'Процент заказов, которые клиенты действительно выкупают' },
+  { term: 'УСН', description: 'Упрощённая система налогообложения' },
+];
+
+export const TermsTab = () => {
+  return (
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-6">Справка по терминам</h2>
+      <div className="space-y-6">
+        {terms.map((item, idx) => (
+          <div key={idx} className="border-b pb-4 last:border-0">
+            <h3 className="font-semibold text-lg mb-2">{item.term}</h3>
+            <p className="text-muted-foreground">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+};
+
+export const SupportTab = () => {
+  return (
+    <Card className="p-12 text-center">
+      <Icon name="MessageCircle" size={64} className="mx-auto mb-4 text-primary" />
+      <h2 className="text-2xl font-semibold mb-4">Поддержка</h2>
+      <p className="text-lg text-muted-foreground mb-6">
+        Александр Фролов
+      </p>
+      <Button size="lg" asChild>
+        <a href="tel:+79037278007">
+          <Icon name="Phone" size={20} className="mr-2" />
+          +7 (903) 727-80-07
+        </a>
+      </Button>
+    </Card>
+  );
+};
