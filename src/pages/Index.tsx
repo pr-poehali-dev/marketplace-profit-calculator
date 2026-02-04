@@ -7,7 +7,15 @@ import { ProductData, CalculationResult } from '@/components/calculator/types';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
 import HistoryTab from '@/components/calculator/HistoryTab';
-import { TermsTab, SupportTab } from '@/components/calculator/TermsAndSupport';
+import { TermsTab } from '@/components/calculator/TermsAndSupport';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { exportToExcel as exportToExcelUtil } from '@/utils/excelExport';
 
 const Index = () => {
@@ -96,6 +104,16 @@ const Index = () => {
     }
   };
 
+  const handleDeleteProduct = (index: number) => {
+    const newProducts = products.filter((_, idx) => idx !== index);
+    const newCalculations = calculations.filter((_, idx) => idx !== index);
+    
+    setProducts(newProducts);
+    setCalculations(newCalculations);
+    
+    toast.success('Товар удалён из истории');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -108,17 +126,46 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">Сервис для селлеров маркетплейсов</p>
               </div>
             </div>
-            <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
-              <Icon name="Download" size={18} className="mr-2" />
-              Экспорт в Excel
-            </Button>
+            <div className="flex gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Icon name="MessageCircle" size={18} className="mr-2" />
+                    Поддержка
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Поддержка</DialogTitle>
+                    <DialogDescription>
+                      Свяжитесь с нами по любым вопросам
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="text-center py-6">
+                    <Icon name="Phone" size={48} className="mx-auto mb-4 text-primary" />
+                    <p className="text-lg font-semibold mb-2">Александр Фролов</p>
+                    <Button size="lg" asChild className="mt-4">
+                      <a href="tel:+79037278007">
+                        <Icon name="Phone" size={20} className="mr-2" />
+                        +7 (903) 727-80-07
+                      </a>
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              
+              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
+                <Icon name="Download" size={18} className="mr-2" />
+                Экспорт в Excel
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="calculator">
               <Icon name="Calculator" size={16} className="mr-2" />
               Финансовый анализ
@@ -134,10 +181,6 @@ const Index = () => {
             <TabsTrigger value="terms">
               <Icon name="BookOpen" size={16} className="mr-2" />
               Справка
-            </TabsTrigger>
-            <TabsTrigger value="support">
-              <Icon name="MessageCircle" size={16} className="mr-2" />
-              Поддержка
             </TabsTrigger>
           </TabsList>
 
@@ -157,15 +200,15 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
-            <HistoryTab products={products} calculations={calculations} />
+            <HistoryTab 
+              products={products} 
+              calculations={calculations}
+              onDeleteProduct={handleDeleteProduct}
+            />
           </TabsContent>
 
           <TabsContent value="terms" className="space-y-4">
             <TermsTab />
-          </TabsContent>
-
-          <TabsContent value="support">
-            <SupportTab />
           </TabsContent>
         </Tabs>
       </main>
