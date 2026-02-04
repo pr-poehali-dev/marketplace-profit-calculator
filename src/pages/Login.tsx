@@ -22,7 +22,7 @@ const Login = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Icon name="TrendingUp" size={48} className="text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Unit Экономика</h1>
+          <h1 className="text-3xl font-bold mb-2">FinPlace 2087</h1>
           <p className="text-muted-foreground">
             Сервис для селлеров маркетплейсов
           </p>
