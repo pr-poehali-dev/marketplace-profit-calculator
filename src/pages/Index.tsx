@@ -123,7 +123,7 @@ const Index = () => {
       refresh: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=refresh',
       logout: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=logout',
     },
-    botUsername: 'unit_ekonomika_bot',
+    botUsername: 'FinPlace_2087_bot',
   });
 
   const handleLogout = async () => {
