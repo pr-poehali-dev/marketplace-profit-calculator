@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { useTelegramAuth } from '@/components/extensions/telegram-bot/useTelegramAuth';
 import { ProductData, CalculationResult } from '@/components/calculator/types';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
@@ -114,6 +116,21 @@ const Index = () => {
     toast.success('Товар удалён из истории');
   };
 
+  const navigate = useNavigate();
+  const auth = useTelegramAuth({
+    apiUrls: {
+      callback: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=callback',
+      refresh: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=refresh',
+      logout: 'https://functions.poehali.dev/09d1ba5e-b952-48a0-b05a-16eb26d046e6?action=logout',
+    },
+    botUsername: 'unit_ekonomika_bot',
+  });
+
+  const handleLogout = async () => {
+    await auth.logout();
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -126,7 +143,25 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">Сервис для селлеров маркетплейсов</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {auth.user && (
+                <div className="flex items-center gap-3 mr-2">
+                  {auth.user.avatar_url && (
+                    <img 
+                      src={auth.user.avatar_url} 
+                      alt={auth.user.name || 'User'} 
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
+                  <span className="text-sm font-medium">{auth.user.name}</span>
+                </div>
+              )}
+              
+              <Button variant="outline" onClick={handleLogout}>
+                <Icon name="LogOut" size={18} className="mr-2" />
+                Выйти
+              </Button>
+              
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline">
