@@ -8,6 +8,7 @@ import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
 import HistoryTab from '@/components/calculator/HistoryTab';
 import { TermsTab, SupportTab } from '@/components/calculator/TermsAndSupport';
+import { exportToExcel as exportToExcelUtil } from '@/utils/excelExport';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('calculator');
@@ -81,7 +82,18 @@ const Index = () => {
   };
 
   const exportToExcel = () => {
-    toast.info('Экспорт в Excel готовится...');
+    if (calculations.length === 0) {
+      toast.error('Нет данных для экспорта. Выполните хотя бы один расчёт.');
+      return;
+    }
+
+    try {
+      exportToExcelUtil(products, calculations);
+      toast.success('Файл Excel успешно скачан!');
+    } catch (error) {
+      toast.error('Ошибка при экспорте в Excel');
+      console.error(error);
+    }
   };
 
   return (
@@ -96,7 +108,7 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">Сервис для селлеров маркетплейсов</p>
               </div>
             </div>
-            <Button onClick={exportToExcel} variant="outline">
+            <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
               <Icon name="Download" size={18} className="mr-2" />
               Экспорт в Excel
             </Button>
