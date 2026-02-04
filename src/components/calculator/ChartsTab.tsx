@@ -235,21 +235,38 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
       </Card>
 
       {calculations.length > 1 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-6">Сравнение всех товаров</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={calculations}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="productName" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="revenue" fill="#0EA5E9" name="Выручка" />
-              <Bar dataKey="netProfit" fill="#10B981" name="Чистая прибыль" />
-              <Bar dataKey="totalCosts" fill="#EF4444" name="Затраты" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+        <>
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-6">Сравнение всех товаров</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={calculations}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="productName" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="revenue" fill="#0EA5E9" name="Выручка" />
+                <Bar dataKey="netProfit" fill="#10B981" name="Чистая прибыль" />
+                <Bar dataKey="totalCosts" fill="#EF4444" name="Затраты" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-6">ROI и Маржинальность</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={calculations}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="productName" />
+                <YAxis />
+                <Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} />
+                <Legend />
+                <Bar dataKey="roi" fill="#8B5CF6" name="ROI (%)" />
+                <Bar dataKey="margin" fill="#10B981" name="Маржинальность (%)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </>
       )}
     </>
   );
