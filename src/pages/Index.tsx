@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
 import { ProductData, CalculationResult } from '@/components/calculator/types';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
@@ -116,13 +114,7 @@ const Index = () => {
     toast.success('Товар удалён из истории');
   };
 
-  const navigate = useNavigate();
-  const auth = useAuth();
 
-  const handleLogout = async () => {
-    await auth.logout();
-    navigate('/login');
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,23 +129,6 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {auth.user && (
-                <div className="flex items-center gap-3 mr-2">
-                  {auth.user.avatar_url && (
-                    <img 
-                      src={auth.user.avatar_url} 
-                      alt={auth.user.name || 'User'} 
-                      className="w-8 h-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-sm font-medium">{auth.user.name}</span>
-                </div>
-              )}
-              
-              <Button variant="outline" onClick={handleLogout}>
-                <Icon name="LogOut" size={18} className="mr-2" />
-                Выйти
-              </Button>
               
               <Dialog>
                 <DialogTrigger asChild>
