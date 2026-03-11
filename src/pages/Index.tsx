@@ -124,7 +124,7 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <Icon name="TrendingUp" size={32} className="text-primary" />
               <div>
-                <h1 className="text-2xl font-bold">FinPlace 2087</h1>
+                <h1 className="text-2xl font-bold text-left">FinPlace </h1>
                 <p className="text-sm text-muted-foreground">Сервис для селлеров маркетплейсов</p>
               </div>
             </div>
