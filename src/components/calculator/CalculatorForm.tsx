@@ -1,115 +1,29 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Icon from '@/components/ui/icon';
 import { ProductData } from './types';
 
-type Preset = Omit<ProductData, 'id'>;
+interface CategoryPreset {
+  label: string;
+  emoji: string;
+  marketplaceCommission: number;
+  redemptionRate: number;
+}
 
-const PRESETS: { label: string; emoji: string; data: Preset }[] = [
-  {
-    label: 'Одежда',
-    emoji: '👕',
-    data: {
-      name: 'Футболка базовая',
-      quantity: 100,
-      purchasePrice: 400,
-      priceBeforeDiscount: 1800,
-      discount: 25,
-      marketplaceCommission: 20,
-      redemptionRate: 40,
-      packagingCost: 500,
-      packagingPerUnit: 25,
-      contractorCost: 3000,
-      photoContentCost: 5000,
-      deliveryCost: 2000,
-      storageCostPerDay: 0.5,
-      taxRate: 6,
-    },
-  },
-  {
-    label: 'Электроника',
-    emoji: '📱',
-    data: {
-      name: 'Аксессуар для телефона',
-      quantity: 200,
-      purchasePrice: 300,
-      priceBeforeDiscount: 1200,
-      discount: 15,
-      marketplaceCommission: 12,
-      redemptionRate: 88,
-      packagingCost: 800,
-      packagingPerUnit: 20,
-      contractorCost: 2000,
-      photoContentCost: 3000,
-      deliveryCost: 3000,
-      storageCostPerDay: 0.3,
-      taxRate: 6,
-    },
-  },
-  {
-    label: 'Косметика',
-    emoji: '💄',
-    data: {
-      name: 'Крем для лица',
-      quantity: 150,
-      purchasePrice: 200,
-      priceBeforeDiscount: 900,
-      discount: 20,
-      marketplaceCommission: 25,
-      redemptionRate: 75,
-      packagingCost: 600,
-      packagingPerUnit: 15,
-      contractorCost: 2500,
-      photoContentCost: 4000,
-      deliveryCost: 1500,
-      storageCostPerDay: 0.2,
-      taxRate: 6,
-    },
-  },
-  {
-    label: 'Товары для дома',
-    emoji: '🏠',
-    data: {
-      name: 'Органайзер для кухни',
-      quantity: 80,
-      purchasePrice: 600,
-      priceBeforeDiscount: 2200,
-      discount: 18,
-      marketplaceCommission: 15,
-      redemptionRate: 82,
-      packagingCost: 700,
-      packagingPerUnit: 40,
-      contractorCost: 2000,
-      photoContentCost: 3500,
-      deliveryCost: 2500,
-      storageCostPerDay: 0.8,
-      taxRate: 6,
-    },
-  },
-  {
-    label: 'Спорт',
-    emoji: '🏋️',
-    data: {
-      name: 'Эспандер латексный',
-      quantity: 120,
-      purchasePrice: 150,
-      priceBeforeDiscount: 700,
-      discount: 20,
-      marketplaceCommission: 12,
-      redemptionRate: 85,
-      packagingCost: 400,
-      packagingPerUnit: 10,
-      contractorCost: 1500,
-      photoContentCost: 2500,
-      deliveryCost: 1200,
-      storageCostPerDay: 0.2,
-      taxRate: 6,
-    },
-  },
+const PRESETS: CategoryPreset[] = [
+  { label: 'Одежда', emoji: '👕', marketplaceCommission: 20, redemptionRate: 40 },
+  { label: 'Электроника', emoji: '📱', marketplaceCommission: 12, redemptionRate: 88 },
+  { label: 'Косметика', emoji: '💄', marketplaceCommission: 25, redemptionRate: 75 },
+  { label: 'Товары для дома', emoji: '🏠', marketplaceCommission: 15, redemptionRate: 82 },
+  { label: 'Спорт', emoji: '🏋️', marketplaceCommission: 12, redemptionRate: 85 },
+  { label: 'Продукты питания', emoji: '🍎', marketplaceCommission: 10, redemptionRate: 92 },
+  { label: 'Детские товары', emoji: '🧸', marketplaceCommission: 18, redemptionRate: 78 },
+  { label: 'Книги', emoji: '📚', marketplaceCommission: 8, redemptionRate: 95 },
 ];
 
 interface CalculatorFormProps {
@@ -240,11 +154,17 @@ const FieldLabel = ({ label, hint, suffix }: { label: string; hint: string; suff
 );
 
 const CalculatorForm = ({ currentProduct, setCurrentProduct, onCalculate }: CalculatorFormProps) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const leftFields = fields.slice(0, 7);
   const rightFields = fields.slice(7);
 
-  const applyPreset = (preset: Preset) => {
-    setCurrentProduct({ ...currentProduct, ...preset });
+  const applyPreset = (preset: CategoryPreset) => {
+    setCurrentProduct({
+      ...currentProduct,
+      marketplaceCommission: preset.marketplaceCommission,
+      redemptionRate: preset.redemptionRate,
+    });
+    setPopoverOpen(false);
   };
 
   const renderField = (field: typeof fields[number]) => (
@@ -269,24 +189,34 @@ const CalculatorForm = ({ currentProduct, setCurrentProduct, onCalculate }: Calc
     <Card className="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h2 className="text-xl font-semibold">Калькулятор unit-экономики</h2>
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((preset) => (
-            <Tooltip key={preset.label}>
-              <TooltipTrigger asChild>
-                <Badge
-                  variant="outline"
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors px-3 py-1 text-sm"
-                  onClick={() => applyPreset(preset.data)}
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Icon name="LayoutTemplate" size={16} className="mr-2" />
+              Выбрать категорию
+              <Icon name="ChevronDown" size={14} className="ml-1" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-64 p-2">
+            <p className="text-xs text-muted-foreground px-2 pb-2">
+              Заполнит комиссию и % выкупа
+            </p>
+            <div className="space-y-0.5">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  onClick={() => applyPreset(preset)}
+                  className="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-muted transition-colors text-sm"
                 >
-                  {preset.emoji} {preset.label}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                Заполнить типовыми значениями для категории «{preset.label}»
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
+                  <span>{preset.emoji} {preset.label}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {preset.marketplaceCommission}% / {preset.redemptionRate}%
+                  </span>
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
