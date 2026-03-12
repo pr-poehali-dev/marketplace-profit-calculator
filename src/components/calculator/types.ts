@@ -9,7 +9,6 @@ export interface ProductData {
   packagingCost: number;
   contractorCost: number;
   photoContentCost: number;
-  packagingPerUnit: number;
   deliveryCost: number;
   redemptionRate: number;
   storageCostPerDay: number;

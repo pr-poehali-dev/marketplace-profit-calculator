@@ -49,7 +49,7 @@ export const exportToExcel = (products: ProductData[], calculations: Calculation
 
   XLSX.utils.book_append_sheet(workbook, summarySheet, 'Сводка');
 
-  const detailedData: any[] = [];
+  const detailedData: Record<string, string | number>[] = [];
   products.forEach((product, idx) => {
     const calc = calculations[idx];
     detailedData.push({
@@ -64,7 +64,6 @@ export const exportToExcel = (products: ProductData[], calculations: Calculation
     detailedData.push({ 'Параметр': 'Затраты на упаковку (₽)', 'Значение': product.packagingCost });
     detailedData.push({ 'Параметр': 'Затраты на услуги подрядчиков (₽)', 'Значение': product.contractorCost });
     detailedData.push({ 'Параметр': 'Услуги фотоконтента (₽)', 'Значение': product.photoContentCost });
-    detailedData.push({ 'Параметр': 'Упаковка на 1 единицу (₽)', 'Значение': product.packagingPerUnit });
     detailedData.push({ 'Параметр': 'Затраты на доставку (₽)', 'Значение': product.deliveryCost });
     detailedData.push({ 'Параметр': '% выкупа по категории', 'Значение': product.redemptionRate });
     detailedData.push({ 'Параметр': 'Хранение на складе за сутки (₽)', 'Значение': product.storageCostPerDay });

@@ -32,7 +32,6 @@ const Index = () => {
     packagingCost: 0,
     contractorCost: 0,
     photoContentCost: 0,
-    packagingPerUnit: 0,
     deliveryCost: 0,
     redemptionRate: 0,
     taxRate: 0,
