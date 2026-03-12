@@ -11,7 +11,7 @@ import { TermsTab } from '@/components/calculator/TermsAndSupport';
 import AIConsultant from '@/components/calculator/AIConsultant';
 import { useYandexAuth } from '@/components/extensions/yandex-auth/useYandexAuth';
 import { YandexLoginButton } from '@/components/extensions/yandex-auth/YandexLoginButton';
-import { UserProfile } from '@/components/extensions/yandex-auth/UserProfile';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -228,11 +228,10 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {auth.isAuthenticated && auth.user ? (
-                <UserProfile user={auth.user} onLogout={auth.logout} />
-              ) : (
-                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} />
-              )}
+              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
+                <Icon name="Download" size={18} className="mr-2" />
+                Экспорт
+              </Button>
 
               <Dialog>
                 <DialogTrigger asChild>
@@ -261,16 +260,100 @@ const Index = () => {
                 </DialogContent>
               </Dialog>
 
-              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
-                <Icon name="Download" size={18} className="mr-2" />
-                Экспорт в Excel
-              </Button>
+              {auth.isAuthenticated && auth.user ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="flex items-center gap-2 rounded-full border px-1.5 py-1.5 pr-3 hover:bg-accent transition-colors">
+                      <Avatar className="h-8 w-8">
+                        {auth.user.avatar_url && (
+                          <AvatarImage src={auth.user.avatar_url} alt={auth.user.name || 'Аватар'} />
+                        )}
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          {auth.user.name
+                            ? auth.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                            : 'Я'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium hidden sm:inline">
+                        {auth.user.name?.split(' ')[0] || 'Аккаунт'}
+                      </span>
+                      <Icon name="Settings" size={16} className="text-muted-foreground" />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Настройки аккаунта</DialogTitle>
+                      <DialogDescription>Информация о вашем аккаунте</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16">
+                          {auth.user.avatar_url && (
+                            <AvatarImage src={auth.user.avatar_url} alt={auth.user.name || 'Аватар'} />
+                          )}
+                          <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                            {auth.user.name
+                              ? auth.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                              : 'Я'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-lg font-semibold">{auth.user.name || 'Пользователь'}</p>
+                          <p className="text-sm text-muted-foreground">Вход через Яндекс</p>
+                        </div>
+                      </div>
 
-              {auth.isAuthenticated && (
-                <Button variant="outline" onClick={loadReportsFromCloud}>
-                  <Icon name="Cloud" size={18} className="mr-2" />
-                  Загрузить из облака
-                </Button>
+                      <div className="space-y-3 rounded-lg border p-4">
+                        {auth.user.email && (
+                          <div className="flex items-center gap-3">
+                            <Icon name="Mail" size={18} className="text-muted-foreground" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Email</p>
+                              <p className="text-sm">{auth.user.email}</p>
+                            </div>
+                          </div>
+                        )}
+                        {auth.user.name && (
+                          <div className="flex items-center gap-3">
+                            <Icon name="User" size={18} className="text-muted-foreground" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Имя</p>
+                              <p className="text-sm">{auth.user.name}</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <Icon name="BarChart3" size={18} className="text-muted-foreground" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Расчётов</p>
+                            <p className="text-sm">{calculations.length}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={loadReportsFromCloud}
+                        >
+                          <Icon name="CloudDownload" size={18} className="mr-2" />
+                          Загрузить отчёты из облака
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          className="w-full justify-start"
+                          onClick={auth.logout}
+                        >
+                          <Icon name="LogOut" size={18} className="mr-2" />
+                          Выйти из аккаунта
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} />
               )}
             </div>
           </div>
