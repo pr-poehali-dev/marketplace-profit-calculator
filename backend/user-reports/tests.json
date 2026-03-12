@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Запрос без авторизации",
+      "method": "GET",
+      "path": "/?action=list",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

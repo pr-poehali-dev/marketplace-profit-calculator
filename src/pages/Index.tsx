@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -9,6 +9,9 @@ import ChartsTab from '@/components/calculator/ChartsTab';
 import HistoryTab from '@/components/calculator/HistoryTab';
 import { TermsTab } from '@/components/calculator/TermsAndSupport';
 import AIConsultant from '@/components/calculator/AIConsultant';
+import { useYandexAuth } from '@/components/extensions/yandex-auth/useYandexAuth';
+import { YandexLoginButton } from '@/components/extensions/yandex-auth/YandexLoginButton';
+import { UserProfile } from '@/components/extensions/yandex-auth/UserProfile';
 import {
   Dialog,
   DialogContent,
@@ -19,9 +22,35 @@ import {
 } from '@/components/ui/dialog';
 import { exportToExcel as exportToExcelUtil } from '@/utils/excelExport';
 
+const AUTH_URL = 'https://functions.poehali.dev/2e056aab-4184-456d-8c5a-84a93c8371be';
+const REPORTS_URL = 'https://functions.poehali.dev/9662ad24-ec22-4880-95e2-3eadedb48c9b';
+
+const STORAGE_KEY = 'finplace_data';
+
+function loadFromStorage(): { products: ProductData[]; calculations: CalculationResult[] } {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      return {
+        products: data.products || [],
+        calculations: data.calculations || [],
+      };
+    }
+  } catch (e) {
+    console.warn('Storage load error', e);
+  }
+  return { products: [], calculations: [] };
+}
+
+function saveToStorage(products: ProductData[], calculations: CalculationResult[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ products, calculations }));
+}
+
 const Index = () => {
+  const stored = loadFromStorage();
   const [activeTab, setActiveTab] = useState('calculator');
-  const [products, setProducts] = useState<ProductData[]>([]);
+  const [products, setProducts] = useState<ProductData[]>(stored.products);
   const [currentProduct, setCurrentProduct] = useState<ProductData>({
     id: '',
     name: '',
@@ -39,12 +68,75 @@ const Index = () => {
     storageCostPerDay: 0,
   });
 
-  const [calculations, setCalculations] = useState<CalculationResult[]>([]);
+  const [calculations, setCalculations] = useState<CalculationResult[]>(stored.calculations);
+
+  const auth = useYandexAuth({
+    apiUrls: {
+      authUrl: `${AUTH_URL}?action=auth-url`,
+      callback: `${AUTH_URL}?action=callback`,
+      refresh: `${AUTH_URL}?action=refresh`,
+      logout: `${AUTH_URL}?action=logout`,
+    },
+  });
+
+  useEffect(() => {
+    saveToStorage(products, calculations);
+  }, [products, calculations]);
+
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.accessToken && products.length > 0) {
+      saveReportsToCloud(products, calculations);
+    }
+  }, [auth.isAuthenticated]);
+
+  const saveReportsToCloud = async (prods: ProductData[], calcs: CalculationResult[]) => {
+    if (!auth.accessToken || prods.length === 0) return;
+    try {
+      await fetch(`${REPORTS_URL}?action=save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...auth.getAuthHeader(),
+        },
+        body: JSON.stringify({ products: prods, calculations: calcs }),
+      });
+    } catch (e) {
+      console.warn('Cloud save error', e);
+    }
+  };
+
+  const loadReportsFromCloud = async () => {
+    if (!auth.accessToken) return;
+    try {
+      const res = await fetch(`${REPORTS_URL}?action=list`, {
+        headers: auth.getAuthHeader(),
+      });
+      const data = await res.json();
+      if (data.reports && data.reports.length > 0) {
+        const cloudProducts: ProductData[] = [];
+        const cloudCalcs: CalculationResult[] = [];
+        data.reports.forEach((r: { productData: ProductData; calculationResult: CalculationResult }) => {
+          cloudProducts.push(r.productData);
+          cloudCalcs.push(r.calculationResult);
+        });
+        const existingIds = new Set(products.map(p => p.id));
+        const newProducts = cloudProducts.filter(p => !existingIds.has(p.id));
+        const newCalcs = cloudCalcs.slice(0, newProducts.length);
+        if (newProducts.length > 0) {
+          setProducts(prev => [...prev, ...newProducts]);
+          setCalculations(prev => [...prev, ...newCalcs]);
+          toast.success(`Загружено ${newProducts.length} отчётов из облака`);
+        }
+      }
+    } catch (e) {
+      console.warn('Cloud load error', e);
+    }
+  };
 
   const calculateMetrics = (product: ProductData): CalculationResult => {
     const sellingPrice = product.priceBeforeDiscount * (1 - product.discount / 100);
     const revenue = sellingPrice * product.quantity * (product.redemptionRate / 100);
-    
+
     const purchaseCost = product.purchasePrice * product.quantity;
     const commissionCost = revenue * (product.marketplaceCommission / 100);
     const packagingCost = product.packagingCost;
@@ -83,10 +175,17 @@ const Index = () => {
 
     const newProduct = { ...currentProduct, id: Date.now().toString() };
     const result = calculateMetrics(newProduct);
-    
-    setProducts([...products, newProduct]);
-    setCalculations([...calculations, result]);
-    
+
+    const updatedProducts = [...products, newProduct];
+    const updatedCalcs = [...calculations, result];
+
+    setProducts(updatedProducts);
+    setCalculations(updatedCalcs);
+
+    if (auth.isAuthenticated) {
+      saveReportsToCloud([newProduct], [result]);
+    }
+
     toast.success('Расчёт выполнен!');
     setActiveTab('charts');
   };
@@ -109,14 +208,12 @@ const Index = () => {
   const handleDeleteProduct = (index: number) => {
     const newProducts = products.filter((_, idx) => idx !== index);
     const newCalculations = calculations.filter((_, idx) => idx !== index);
-    
+
     setProducts(newProducts);
     setCalculations(newCalculations);
-    
+
     toast.success('Товар удалён из истории');
   };
-
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,7 +228,12 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              
+              {auth.isAuthenticated && auth.user ? (
+                <UserProfile user={auth.user} onLogout={auth.logout} />
+              ) : (
+                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} />
+              )}
+
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline">
@@ -158,11 +260,18 @@ const Index = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-              
+
               <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
                 <Icon name="Download" size={18} className="mr-2" />
                 Экспорт в Excel
               </Button>
+
+              {auth.isAuthenticated && (
+                <Button variant="outline" onClick={loadReportsFromCloud}>
+                  <Icon name="Cloud" size={18} className="mr-2" />
+                  Загрузить из облака
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -205,8 +314,8 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
-            <HistoryTab 
-              products={products} 
+            <HistoryTab
+              products={products}
               calculations={calculations}
               onDeleteProduct={handleDeleteProduct}
             />
