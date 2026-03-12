@@ -47,7 +47,7 @@ const Index = () => {
     
     const purchaseCost = product.purchasePrice * product.quantity;
     const commissionCost = revenue * (product.marketplaceCommission / 100);
-    const totalPackaging = product.packagingCost + (product.packagingPerUnit * product.quantity);
+    const totalPackaging = product.packagingCost;
     const otherCosts = product.contractorCost + product.photoContentCost + product.deliveryCost + (product.storageCostPerDay * 30 * product.quantity);
     
     const totalCosts = purchaseCost + commissionCost + totalPackaging + product.deliveryCost + otherCosts;

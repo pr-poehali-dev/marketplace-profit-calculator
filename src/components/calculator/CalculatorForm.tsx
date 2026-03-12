@@ -16,7 +16,7 @@ interface CategoryPreset {
 }
 
 const PRESETS: CategoryPreset[] = [
-  { label: 'Одежда', emoji: '👕', marketplaceCommission: 20, redemptionRate: 40 },
+  { label: 'Одежда', emoji: '👕', marketplaceCommission: 20, redemptionRate: 75 },
   { label: 'Электроника', emoji: '📱', marketplaceCommission: 12, redemptionRate: 88 },
   { label: 'Косметика', emoji: '💄', marketplaceCommission: 25, redemptionRate: 75 },
   { label: 'Товары для дома', emoji: '🏠', marketplaceCommission: 15, redemptionRate: 82 },
@@ -92,13 +92,6 @@ const fields: {
     placeholder: '50',
     suffix: '₽',
     hint: 'Общая фиксированная стоимость расходников: пакеты, коробки, стикеры, лента — на всю партию.',
-  },
-  {
-    key: 'packagingPerUnit',
-    label: 'Упаковка на 1 единицу',
-    placeholder: '30',
-    suffix: '₽',
-    hint: 'Стоимость упаковки одной единицы товара. Умножается на количество и прибавляется к общим затратам.',
   },
   {
     key: 'contractorCost',
