@@ -206,22 +206,22 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
       )}
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Структура затрат</h3>
+        <h3 className="text-lg font-semibold mb-6">Структура затрат{calculations.length > 1 ? ' (сумма по всем товарам)' : ''}</h3>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
               data={[
-                { name: 'Закупка', value: calculations[0].costBreakdown.purchase },
-                { name: 'Комиссия МП', value: calculations[0].costBreakdown.commission },
-                { name: 'Упаковка', value: calculations[0].costBreakdown.packaging },
-                { name: 'Доставка', value: calculations[0].costBreakdown.delivery },
-                { name: 'Прочее', value: calculations[0].costBreakdown.other },
-              ]}
+                { name: 'Закупка', value: Math.round(calculations.reduce((s, c) => s + c.costBreakdown.purchase, 0)) },
+                { name: 'Комиссия МП', value: Math.round(calculations.reduce((s, c) => s + c.costBreakdown.commission, 0)) },
+                { name: 'Упаковка', value: Math.round(calculations.reduce((s, c) => s + c.costBreakdown.packaging, 0)) },
+                { name: 'Доставка', value: Math.round(calculations.reduce((s, c) => s + c.costBreakdown.delivery, 0)) },
+                { name: 'Прочее', value: Math.round(calculations.reduce((s, c) => s + c.costBreakdown.other, 0)) },
+              ].filter(d => d.value > 0)}
               cx="50%"
               cy="50%"
-              labelLine={false}
+              labelLine={true}
               label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              outerRadius={140}
+              outerRadius={130}
               fill="#8884d8"
               dataKey="value"
             >
@@ -229,7 +229,8 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
                 <Cell key={`cell-${index}`} fill={color} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={(value: number) => [`${value.toLocaleString('ru-RU')} ₽`, '']} />
+            <Legend />
           </PieChart>
         </ResponsiveContainer>
       </Card>
