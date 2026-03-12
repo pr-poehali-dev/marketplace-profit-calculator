@@ -89,18 +89,29 @@ def handler(event: dict, context) -> dict:
                 'body': json.dumps({'error': 'Нет данных для сохранения'}, ensure_ascii=False),
             }
 
+        cur.execute(
+            "SELECT product_data->>'id' FROM user_reports WHERE user_id = %s",
+            (user_id,)
+        )
+        existing_ids = set(row[0] for row in cur.fetchall() if row[0])
+
+        saved = 0
         for prod, calc in zip(products, calculations):
+            product_id = prod.get('id', '')
+            if product_id and product_id in existing_ids:
+                continue
             cur.execute(
                 "INSERT INTO user_reports (user_id, product_data, calculation_result) VALUES (%s, %s, %s)",
                 (user_id, json.dumps(prod, ensure_ascii=False), json.dumps(calc, ensure_ascii=False))
             )
+            saved += 1
 
         cur.close()
         conn.close()
         return {
             'statusCode': 200,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'ok': True, 'saved': len(products)}, ensure_ascii=False),
+            'body': json.dumps({'ok': True, 'saved': saved}, ensure_ascii=False),
         }
 
     cur.close()

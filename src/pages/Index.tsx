@@ -69,6 +69,7 @@ const Index = () => {
   });
 
   const [calculations, setCalculations] = useState<CalculationResult[]>(stored.calculations);
+  const [cloudSynced, setCloudSynced] = useState(false);
 
   const auth = useYandexAuth({
     apiUrls: {
@@ -84,10 +85,54 @@ const Index = () => {
   }, [products, calculations]);
 
   useEffect(() => {
-    if (auth.isAuthenticated && auth.accessToken && products.length > 0) {
-      saveReportsToCloud(products, calculations);
+    if (auth.isAuthenticated && auth.accessToken && !cloudSynced) {
+      setCloudSynced(true);
+      syncWithCloud();
     }
-  }, [auth.isAuthenticated]);
+  }, [auth.isAuthenticated, auth.accessToken, cloudSynced]);
+
+  const syncWithCloud = async () => {
+    if (!auth.accessToken) return;
+    try {
+      const res = await fetch(`${REPORTS_URL}?action=list`, {
+        headers: auth.getAuthHeader(),
+      });
+      const data = await res.json();
+      if (data.reports && data.reports.length > 0) {
+        const cloudProducts: ProductData[] = [];
+        const cloudCalcs: CalculationResult[] = [];
+        data.reports.forEach((r: { productData: ProductData; calculationResult: CalculationResult }) => {
+          cloudProducts.push(r.productData);
+          cloudCalcs.push(r.calculationResult);
+        });
+
+        setProducts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newFromCloud = cloudProducts.filter(p => !existingIds.has(p.id));
+          if (newFromCloud.length > 0) {
+            toast.success(`Загружено ${newFromCloud.length} расчётов из облака`);
+          }
+          const merged = [...prev, ...newFromCloud];
+          return merged;
+        });
+        setCalculations(prev => {
+          const existingNames = new Set(prev.map((c, i) => `${products[i]?.id}`));
+          const startIdx = cloudProducts.length - cloudCalcs.length;
+          const newCalcs = cloudCalcs.filter((_, i) => {
+            const pid = cloudProducts[i]?.id;
+            return !existingNames.has(pid);
+          });
+          return [...prev, ...newCalcs];
+        });
+      }
+
+      if (products.length > 0) {
+        await saveReportsToCloud(products, calculations);
+      }
+    } catch (e) {
+      console.warn('Cloud sync error', e);
+    }
+  };
 
   const saveReportsToCloud = async (prods: ProductData[], calcs: CalculationResult[]) => {
     if (!auth.accessToken || prods.length === 0) return;
@@ -121,12 +166,16 @@ const Index = () => {
         });
         const existingIds = new Set(products.map(p => p.id));
         const newProducts = cloudProducts.filter(p => !existingIds.has(p.id));
-        const newCalcs = cloudCalcs.slice(0, newProducts.length);
         if (newProducts.length > 0) {
+          const newCalcs = cloudCalcs.filter((_, i) => !existingIds.has(cloudProducts[i]?.id));
           setProducts(prev => [...prev, ...newProducts]);
           setCalculations(prev => [...prev, ...newCalcs]);
-          toast.success(`Загружено ${newProducts.length} отчётов из облака`);
+          toast.success(`Загружено ${newProducts.length} расчётов из облака`);
+        } else {
+          toast.info('Все расчёты уже загружены');
         }
+      } else {
+        toast.info('В облаке нет сохранённых расчётов');
       }
     } catch (e) {
       console.warn('Cloud load error', e);
