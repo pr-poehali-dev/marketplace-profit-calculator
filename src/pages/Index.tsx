@@ -46,10 +46,12 @@ const Index = () => {
     
     const purchaseCost = product.purchasePrice * product.quantity;
     const commissionCost = revenue * (product.marketplaceCommission / 100);
-    const totalPackaging = product.packagingCost;
-    const otherCosts = product.contractorCost + product.photoContentCost + product.deliveryCost + (product.storageCostPerDay * 30 * product.quantity);
-    
-    const totalCosts = purchaseCost + commissionCost + totalPackaging + product.deliveryCost + otherCosts;
+    const packagingCost = product.packagingCost;
+    const deliveryCost = product.deliveryCost;
+    const storageCost = product.storageCostPerDay * 30 * product.quantity;
+    const otherCosts = product.contractorCost + product.photoContentCost + storageCost;
+
+    const totalCosts = purchaseCost + commissionCost + packagingCost + deliveryCost + otherCosts;
     const grossProfit = revenue - purchaseCost;
     const netProfitBeforeTax = revenue - totalCosts;
     const netProfit = netProfitBeforeTax * (1 - product.taxRate / 100);
@@ -65,8 +67,8 @@ const Index = () => {
       costBreakdown: {
         purchase: purchaseCost,
         commission: commissionCost,
-        packaging: totalPackaging,
-        delivery: product.deliveryCost,
+        packaging: packagingCost,
+        delivery: deliveryCost,
         other: otherCosts,
       },
     };
