@@ -117,7 +117,7 @@ const AIConsultant = ({ currentProduct }: AIConsultantProps) => {
               <div className="flex items-center gap-2">
                 <Icon name="Bot" size={20} />
                 <div>
-                  <p className="font-semibold text-sm">AI-консультант</p>
+                  <p className="font-semibold text-sm">AI-консультант FinPlace</p>
                   <p className="text-xs opacity-80">Маркетплейсы · Доставка · Цены</p>
                 </div>
               </div>
