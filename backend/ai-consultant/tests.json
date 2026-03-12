@@ -1,0 +1,15 @@
+{
+  "tests": [
+    {
+      "name": "Вопрос о доставке",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "messages": [{"role": "user", "content": "Сколько стоит доставка на Wildberries для небольшого товара весом 500г?"}]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"reply": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

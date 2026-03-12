@@ -8,6 +8,7 @@ import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ChartsTab from '@/components/calculator/ChartsTab';
 import HistoryTab from '@/components/calculator/HistoryTab';
 import { TermsTab } from '@/components/calculator/TermsAndSupport';
+import AIConsultant from '@/components/calculator/AIConsultant';
 import {
   Dialog,
   DialogContent,
@@ -216,6 +217,7 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+      <AIConsultant currentProduct={currentProduct} />
     </div>
   );
 };
