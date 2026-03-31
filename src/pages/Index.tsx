@@ -391,14 +391,6 @@ const Index = () => {
 
                       <div className="space-y-2">
                         <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                          onClick={loadReportsFromCloud}
-                        >
-                          <Icon name="CloudDownload" size={18} className="mr-2" />
-                          Загрузить отчёты из облака
-                        </Button>
-                        <Button
                           variant="destructive"
                           className="w-full justify-start"
                           onClick={auth.logout}
