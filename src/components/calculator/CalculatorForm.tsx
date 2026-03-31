@@ -179,9 +179,9 @@ const CalculatorForm = ({ currentProduct, setCurrentProduct, onCalculate }: Calc
   );
 
   return (
-    <Card className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <h2 className="text-xl font-semibold">Калькулятор unit-экономики</h2>
+    <Card className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-6">
+        <h2 className="text-lg md:text-xl font-semibold">Калькулятор unit-экономики</h2>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm">
@@ -212,12 +212,12 @@ const CalculatorForm = ({ currentProduct, setCurrentProduct, onCalculate }: Calc
         </Popover>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">{leftFields.map(renderField)}</div>
-        <div className="space-y-4">{rightFields.map(renderField)}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="space-y-3 md:space-y-4">{leftFields.map(renderField)}</div>
+        <div className="space-y-3 md:space-y-4">{rightFields.map(renderField)}</div>
       </div>
 
-      <Button onClick={onCalculate} className="w-full mt-6" size="lg">
+      <Button onClick={onCalculate} className="w-full mt-5 md:mt-6" size="lg">
         <Icon name="Calculator" size={20} className="mr-2" />
         Рассчитать показатели
       </Button>

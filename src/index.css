@@ -105,5 +105,30 @@
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (max-width: 767px) {
+  .recharts-legend-wrapper {
+    font-size: 11px !important;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    font-size: 11px !important;
+  }
+
+  .recharts-pie-label-text {
+    font-size: 11px !important;
   }
 }

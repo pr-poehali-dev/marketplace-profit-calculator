@@ -267,24 +267,33 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-3 py-3 md:px-4 md:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Icon name="TrendingUp" size={32} className="text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold text-left">FinPlace </h1>
-                <p className="text-sm text-muted-foreground">Сервис для селлеров маркетплейсов</p>
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <Icon name="TrendingUp" size={28} className="text-primary shrink-0 md:hidden" />
+              <Icon name="TrendingUp" size={32} className="text-primary shrink-0 hidden md:block" />
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-2xl font-bold text-left truncate">FinPlace</h1>
+                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Сервис для селлеров маркетплейсов</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0}>
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0} size="icon" className="md:hidden h-9 w-9">
+                <Icon name="Download" size={18} />
+              </Button>
+              <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0} className="hidden md:flex">
                 <Icon name="Download" size={18} className="mr-2" />
                 Экспорт
               </Button>
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" size="icon" className="md:hidden h-9 w-9">
+                    <Icon name="MessageCircle" size={18} />
+                  </Button>
+                </DialogTrigger>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="hidden md:flex">
                     <Icon name="MessageCircle" size={18} className="mr-2" />
                     Поддержка
                   </Button>
@@ -312,7 +321,7 @@ const Index = () => {
               {auth.isAuthenticated && auth.user ? (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button className="flex items-center gap-2 rounded-full border px-1.5 py-1.5 pr-3 hover:bg-accent transition-colors">
+                    <button className="flex items-center gap-1.5 md:gap-2 rounded-full border px-1.5 py-1.5 md:pr-3 hover:bg-accent transition-colors">
                       <Avatar className="h-8 w-8">
                         {auth.user.avatar_url && (
                           <AvatarImage src={auth.user.avatar_url} alt={auth.user.name || 'Аватар'} />
@@ -323,10 +332,10 @@ const Index = () => {
                             : 'Я'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium hidden sm:inline">
+                      <span className="text-sm font-medium hidden md:inline">
                         {auth.user.name?.split(' ')[0] || 'Аккаунт'}
                       </span>
-                      <Icon name="Settings" size={16} className="text-muted-foreground" />
+                      <Icon name="Settings" size={16} className="text-muted-foreground hidden md:block" />
                     </button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md">
@@ -402,31 +411,38 @@ const Index = () => {
                   </DialogContent>
                 </Dialog>
               ) : (
-                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} />
+                <>
+                  <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} buttonText="Войти" className="md:hidden text-sm px-3" />
+                  <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} className="hidden md:flex" />
+                </>
               )}
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 py-4 md:px-4 md:py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="calculator">
-              <Icon name="Calculator" size={16} className="mr-2" />
-              Финансовый анализ
+          <TabsList className="grid w-full grid-cols-4 mb-4 md:mb-8">
+            <TabsTrigger value="calculator" className="text-xs md:text-sm px-1 md:px-3">
+              <Icon name="Calculator" size={16} className="md:mr-2" />
+              <span className="hidden md:inline">Финансовый анализ</span>
+              <span className="md:hidden ml-1">Расчёт</span>
             </TabsTrigger>
-            <TabsTrigger value="charts">
-              <Icon name="BarChart3" size={16} className="mr-2" />
-              Диаграммы
+            <TabsTrigger value="charts" className="text-xs md:text-sm px-1 md:px-3">
+              <Icon name="BarChart3" size={16} className="md:mr-2" />
+              <span className="hidden md:inline">Диаграммы</span>
+              <span className="md:hidden ml-1">Графики</span>
             </TabsTrigger>
-            <TabsTrigger value="history">
-              <Icon name="History" size={16} className="mr-2" />
-              История
+            <TabsTrigger value="history" className="text-xs md:text-sm px-1 md:px-3">
+              <Icon name="History" size={16} className="md:mr-2" />
+              <span className="hidden md:inline">История</span>
+              <span className="md:hidden ml-1">Записи</span>
             </TabsTrigger>
-            <TabsTrigger value="terms">
-              <Icon name="BookOpen" size={16} className="mr-2" />
-              Справка
+            <TabsTrigger value="terms" className="text-xs md:text-sm px-1 md:px-3">
+              <Icon name="BookOpen" size={16} className="md:mr-2" />
+              <span className="hidden md:inline">Справка</span>
+              <span className="md:hidden ml-1">Инфо</span>
             </TabsTrigger>
           </TabsList>
 

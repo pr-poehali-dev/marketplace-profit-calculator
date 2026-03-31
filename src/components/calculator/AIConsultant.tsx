@@ -103,33 +103,33 @@ const AIConsultant = ({ currentProduct }: AIConsultantProps) => {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg"
         size="icon"
         title="AI-консультант"
       >
-        <Icon name="Bot" size={24} />
+        <Icon name="Bot" size={22} />
       </Button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-24px)]">
-          <Card className="flex flex-col shadow-2xl border-2" style={{ height: '520px' }}>
-            <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+        <div className="fixed inset-0 z-50 md:inset-auto md:bottom-24 md:right-6 md:w-[380px] md:max-w-[calc(100vw-24px)]">
+          <Card className="flex flex-col shadow-2xl border-0 md:border-2 rounded-none md:rounded-lg h-full md:h-[520px]">
+            <div className="flex items-center justify-between p-3 md:p-4 border-b bg-primary text-primary-foreground md:rounded-t-lg safe-top">
               <div className="flex items-center gap-2">
                 <Icon name="Bot" size={20} />
                 <div>
-                  <p className="font-semibold text-sm">AI-консультант FinPlace</p>
+                  <p className="font-semibold text-sm">AI-консультант</p>
                   <p className="text-xs opacity-80">Маркетплейсы · Доставка · Цены</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs bg-green-500 text-white border-0">онлайн</Badge>
+                <Badge variant="secondary" className="text-xs bg-green-500 text-white border-0 hidden sm:inline-flex">онлайн</Badge>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 hover:bg-primary-foreground/20 text-primary-foreground"
+                  className="h-9 w-9 md:h-8 md:w-8 hover:bg-primary-foreground/20 text-primary-foreground"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Icon name="X" size={16} />
+                  <Icon name="X" size={18} />
                 </Button>
               </div>
             </div>
@@ -179,7 +179,7 @@ const AIConsultant = ({ currentProduct }: AIConsultantProps) => {
               </div>
             )}
 
-            <div className="p-3 border-t">
+            <div className="p-3 border-t safe-bottom">
               <div className="flex gap-2 items-end">
                 <textarea
                   ref={inputRef}
@@ -188,7 +188,7 @@ const AIConsultant = ({ currentProduct }: AIConsultantProps) => {
                   onKeyDown={handleKeyDown}
                   placeholder="Спросите что-нибудь..."
                   rows={1}
-                  className="flex-1 resize-none rounded-xl border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary min-h-[40px] max-h-[100px]"
+                  className="flex-1 resize-none rounded-xl border bg-background px-3 py-2.5 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary min-h-[40px] max-h-[100px]"
                   style={{ overflow: 'hidden' }}
                   onInput={(e) => {
                     const t = e.target as HTMLTextAreaElement;
@@ -205,7 +205,7 @@ const AIConsultant = ({ currentProduct }: AIConsultantProps) => {
                   <Icon name="Send" size={16} />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">Enter — отправить · Shift+Enter — новая строка</p>
+              <p className="text-xs text-muted-foreground text-center mt-2 hidden md:block">Enter — отправить · Shift+Enter — новая строка</p>
             </div>
           </Card>
         </div>

@@ -54,10 +54,11 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
 
   if (calculations.length === 0) {
     return (
-      <Card className="p-12 text-center">
-        <Icon name="BarChart3" size={64} className="mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-xl font-semibold mb-2">Нет данных для отображения</h3>
-        <p className="text-muted-foreground mb-4">Выполните расчёт в калькуляторе</p>
+      <Card className="p-8 md:p-12 text-center">
+        <Icon name="BarChart3" size={48} className="mx-auto mb-4 text-muted-foreground md:hidden" />
+        <Icon name="BarChart3" size={64} className="mx-auto mb-4 text-muted-foreground hidden md:block" />
+        <h3 className="text-lg md:text-xl font-semibold mb-2">Нет данных для отображения</h3>
+        <p className="text-sm md:text-base text-muted-foreground mb-4">Выполните расчёт в калькуляторе</p>
         <Button onClick={onNavigateToCalculator}>
           Перейти к калькулятору
         </Button>
@@ -68,29 +69,30 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
   return (
     <>
       {calculations.length > 1 && bestProduct && (
-        <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <Icon name="TrendingUp" size={32} className="text-green-600" />
+        <Card className="p-4 md:p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <div className="flex items-start gap-3 md:gap-4">
+            <div className="p-2 md:p-3 bg-green-100 rounded-lg shrink-0">
+              <Icon name="TrendingUp" size={24} className="text-green-600 md:hidden" />
+              <Icon name="TrendingUp" size={32} className="text-green-600 hidden md:block" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-xl font-bold">Наиболее перспективный товар</h3>
-                <Badge className="bg-green-600">Лучший выбор</Badge>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1 md:mb-2">
+                <h3 className="text-base md:text-xl font-bold">Лучший товар</h3>
+                <Badge className="bg-green-600 text-xs">Лучший выбор</Badge>
               </div>
-              <p className="text-2xl font-bold text-green-700 mb-2">{bestProduct.productName}</p>
-              <div className="grid grid-cols-3 gap-4 mt-4">
+              <p className="text-lg md:text-2xl font-bold text-green-700 mb-2 truncate">{bestProduct.productName}</p>
+              <div className="grid grid-cols-3 gap-2 md:gap-4 mt-3 md:mt-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Маржинальность</p>
-                  <p className="text-xl font-bold text-green-600">{bestProduct.margin.toFixed(2)}%</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Маржа</p>
+                  <p className="text-base md:text-xl font-bold text-green-600">{bestProduct.margin.toFixed(1)}%</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Чистая прибыль</p>
-                  <p className="text-xl font-bold text-green-600">{bestProduct.netProfit.toLocaleString('ru-RU')} ₽</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Прибыль</p>
+                  <p className="text-base md:text-xl font-bold text-green-600">{bestProduct.netProfit.toLocaleString('ru-RU')} ₽</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Выручка</p>
-                  <p className="text-xl font-bold">{bestProduct.revenue.toLocaleString('ru-RU')} ₽</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Выручка</p>
+                  <p className="text-base md:text-xl font-bold">{bestProduct.revenue.toLocaleString('ru-RU')} ₽</p>
                 </div>
               </div>
             </div>
@@ -98,43 +100,43 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {calculations.map((calc, idx) => (
           <Card
             key={idx}
-            className={`p-6 cursor-pointer transition-all hover:shadow-lg ${
+            className={`p-4 md:p-6 cursor-pointer transition-all hover:shadow-lg ${
               selectedProducts.includes(idx) ? 'ring-2 ring-primary' : ''
             } ${
               calc.productName === bestProduct?.productName ? 'border-green-400 border-2' : ''
             }`}
             onClick={() => toggleProductSelection(idx)}
           >
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="font-semibold">{calc.productName}</h3>
+            <div className="flex items-start justify-between mb-3 md:mb-4">
+              <h3 className="font-semibold text-sm md:text-base truncate mr-2">{calc.productName}</h3>
               {calc.productName === bestProduct?.productName && (
-                <Badge className="bg-green-600">
+                <Badge className="bg-green-600 text-xs shrink-0">
                   <Icon name="Star" size={12} className="mr-1" />
                   Лучший
                 </Badge>
               )}
             </div>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Выручка</p>
-                <p className="text-xl font-bold">{calc.revenue.toLocaleString('ru-RU')} ₽</p>
+            <div className="space-y-2 md:space-y-3">
+              <div className="flex justify-between items-baseline md:block">
+                <p className="text-xs md:text-sm text-muted-foreground">Выручка</p>
+                <p className="text-base md:text-xl font-bold">{calc.revenue.toLocaleString('ru-RU')} ₽</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Чистая прибыль</p>
-                <p className="text-xl font-bold text-green-600">{calc.netProfit.toLocaleString('ru-RU')} ₽</p>
+              <div className="flex justify-between items-baseline md:block">
+                <p className="text-xs md:text-sm text-muted-foreground">Чистая прибыль</p>
+                <p className="text-base md:text-xl font-bold text-green-600">{calc.netProfit.toLocaleString('ru-RU')} ₽</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Маржинальность</p>
-                <p className="text-xl font-bold">{calc.margin.toFixed(2)}%</p>
+              <div className="flex justify-between items-baseline md:block">
+                <p className="text-xs md:text-sm text-muted-foreground">Маржинальность</p>
+                <p className="text-base md:text-xl font-bold">{calc.margin.toFixed(2)}%</p>
               </div>
             </div>
             {selectedProducts.includes(idx) && (
-              <div className="mt-4 pt-4 border-t">
-                <Badge variant="outline" className="w-full justify-center">
+              <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t">
+                <Badge variant="outline" className="w-full justify-center text-xs">
                   <Icon name="Check" size={14} className="mr-1" />
                   Выбран для сравнения
                 </Badge>
@@ -145,15 +147,15 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
       </div>
 
       {selectedProducts.length > 1 && (
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Детальное сравнение выбранных товаров</h3>
+        <Card className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 md:mb-6">
+            <h3 className="text-base md:text-lg font-semibold">Сравнение товаров</h3>
             <Button variant="outline" size="sm" onClick={() => setSelectedProducts([])}>
               <Icon name="X" size={16} className="mr-2" />
-              Сбросить выбор
+              Сбросить
             </Button>
           </div>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={[
               {
                 metric: 'Маржа',
@@ -205,9 +207,9 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
         </Card>
       )}
 
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Структура затрат{calculations.length > 1 ? ' (сумма по всем товарам)' : ''}</h3>
-        <ResponsiveContainer width="100%" height={400}>
+      <Card className="p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold mb-4 md:mb-6">Структура затрат{calculations.length > 1 ? ' (сумма)' : ''}</h3>
+        <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
               data={[
@@ -221,7 +223,7 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
               cy="50%"
               labelLine={true}
               label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              outerRadius={130}
+              outerRadius={100}
               fill="#8884d8"
               dataKey="value"
             >
@@ -237,33 +239,33 @@ const ChartsTab = ({ calculations, onNavigateToCalculator }: ChartsTabProps) => 
 
       {calculations.length > 1 && (
         <>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-6">Сравнение всех товаров</h3>
-            <ResponsiveContainer width="100%" height={400}>
+          <Card className="p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold mb-4 md:mb-6">Сравнение товаров</h3>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={calculations}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="productName" />
-                <YAxis />
+                <XAxis dataKey="productName" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={50} />
+                <YAxis tick={{ fontSize: 12 }} width={60} />
                 <Tooltip />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="revenue" fill="#0EA5E9" name="Выручка" />
-                <Bar dataKey="netProfit" fill="#10B981" name="Чистая прибыль" />
+                <Bar dataKey="netProfit" fill="#10B981" name="Прибыль" />
                 <Bar dataKey="totalCosts" fill="#EF4444" name="Затраты" />
               </BarChart>
             </ResponsiveContainer>
           </Card>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-6">ROI и Маржинальность</h3>
-            <ResponsiveContainer width="100%" height={400}>
+          <Card className="p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold mb-4 md:mb-6">ROI и Маржинальность</h3>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={calculations}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="productName" />
-                <YAxis />
+                <XAxis dataKey="productName" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={50} />
+                <YAxis tick={{ fontSize: 12 }} width={50} />
                 <Tooltip formatter={(value) => `${Number(value).toFixed(2)}%`} />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="roi" fill="#8B5CF6" name="ROI (%)" />
-                <Bar dataKey="margin" fill="#10B981" name="Маржинальность (%)" />
+                <Bar dataKey="margin" fill="#10B981" name="Маржа (%)" />
               </BarChart>
             </ResponsiveContainer>
           </Card>

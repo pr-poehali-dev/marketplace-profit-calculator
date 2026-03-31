@@ -12,13 +12,13 @@ const terms = [
 
 export const TermsTab = () => {
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">Справка по терминам</h2>
-      <div className="space-y-6">
+    <Card className="p-4 md:p-6">
+      <h2 className="text-lg md:text-xl font-semibold mb-4 md:mb-6">Справка по терминам</h2>
+      <div className="space-y-4 md:space-y-6">
         {terms.map((item, idx) => (
-          <div key={idx} className="border-b pb-4 last:border-0">
-            <h3 className="font-semibold text-lg mb-2">{item.term}</h3>
-            <p className="text-muted-foreground">{item.description}</p>
+          <div key={idx} className="border-b pb-3 md:pb-4 last:border-0">
+            <h3 className="font-semibold text-base md:text-lg mb-1 md:mb-2">{item.term}</h3>
+            <p className="text-sm md:text-base text-muted-foreground">{item.description}</p>
           </div>
         ))}
       </div>
@@ -28,10 +28,11 @@ export const TermsTab = () => {
 
 export const SupportTab = () => {
   return (
-    <Card className="p-12 text-center">
-      <Icon name="MessageCircle" size={64} className="mx-auto mb-4 text-primary" />
-      <h2 className="text-2xl font-semibold mb-4">Поддержка</h2>
-      <p className="text-lg text-muted-foreground mb-6">
+    <Card className="p-8 md:p-12 text-center">
+      <Icon name="MessageCircle" size={48} className="mx-auto mb-4 text-primary md:hidden" />
+      <Icon name="MessageCircle" size={64} className="mx-auto mb-4 text-primary hidden md:block" />
+      <h2 className="text-xl md:text-2xl font-semibold mb-4">Поддержка</h2>
+      <p className="text-base md:text-lg text-muted-foreground mb-6">
         Александр Фролов
       </p>
       <Button size="lg" asChild>
