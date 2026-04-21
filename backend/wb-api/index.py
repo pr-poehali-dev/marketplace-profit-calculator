@@ -52,7 +52,7 @@ def decrypt_token(encrypted: str) -> str:
 
 
 def verify_wb_token(token: str) -> dict:
-    url = 'https://statistics-api.wildberries.ru/ping'
+    url = 'https://common-api.wildberries.ru/api/v1/seller-info'
     req = urllib.request.Request(url, headers={'Authorization': token})
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:

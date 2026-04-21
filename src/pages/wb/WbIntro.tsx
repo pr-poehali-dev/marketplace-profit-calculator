@@ -102,15 +102,33 @@ export default function WbIntro() {
             реклама, прогноз на 90 дней и инсайты по точкам роста.
           </p>
 
+          {!auth.isAuthenticated && (
+            <div className="mt-6 max-w-md mx-auto rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3 text-left">
+              <Icon name="Info" size={18} className="text-primary shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <div className="font-medium">Сначала войдите через Яндекс</div>
+                <div className="text-muted-foreground mt-0.5">
+                  Это нужно, чтобы ваш токен WB хранился в зашифрованном виде именно для вашего аккаунта.
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2" disabled={!auth.isAuthenticated}>
-                  <Icon name="Link2" size={18} />
-                  Подключить кабинет
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
+            {!auth.isAuthenticated ? (
+              <Button size="lg" onClick={auth.login} className="gap-2">
+                <Icon name="LogIn" size={18} />
+                Войти через Яндекс
+              </Button>
+            ) : (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="gap-2">
+                    <Icon name="Link2" size={18} />
+                    Подключить кабинет
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Подключение Wildberries</DialogTitle>
                   <DialogDescription>Вставьте API-токен. Он сохранится в зашифрованном виде.</DialogDescription>
@@ -148,15 +166,11 @@ export default function WbIntro() {
                     )}
                   </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
 
-            {!auth.isAuthenticated ? (
-              <Button size="lg" variant="outline" onClick={auth.login} className="gap-2">
-                <Icon name="LogIn" size={18} />
-                Войти через Яндекс
-              </Button>
-            ) : (
+            {auth.isAuthenticated && (
               <Button size="lg" variant="outline" onClick={handleDemoSync} disabled={syncing} className="gap-2">
                 {syncing ? <Icon name="Loader2" size={18} className="animate-spin" /> : <Icon name="Play" size={18} />}
                 Попробовать на демо-данных
@@ -197,11 +211,6 @@ export default function WbIntro() {
           ))}
         </div>
 
-        {!auth.isAuthenticated && (
-          <div className="mt-10 text-center text-sm text-muted-foreground">
-            Чтобы подключить кабинет, сначала войдите через Яндекс.
-          </div>
-        )}
       </section>
     </div>
   );
