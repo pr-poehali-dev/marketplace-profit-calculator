@@ -54,22 +54,27 @@ export interface ProductRow extends TopProduct {
   drr: number; stock: number; turnover: number; status: 'star' | 'ok' | 'warn';
 }
 
-export const wbApi = {
-  status: () => call<WbStatus>('status'),
-  connect: (token: string) => call<{ success: boolean; tokenLast4: string; warning?: string }>(
-    'connect', { method: 'POST', body: { token } }
-  ),
-  disconnect: () => call<{ success: boolean }>('disconnect', { method: 'DELETE' }),
-  sync: () => call<{ success: boolean; demoUsed: boolean; rows: number }>('sync', { method: 'POST' }),
-  dashboard: (days: number) => call<{
+// Используем локальные моки — раздел полностью самодостаточен,
+// без запросов к бэкенду. Тот же API-контракт сохранён.
+import { wbMock } from './wbMock';
+
+// Подавляем unused-warnings, пока моки активны
+void call;
+
+export const wbApi = wbMock as unknown as {
+  status: () => Promise<WbStatus>;
+  connect: (token: string) => Promise<{ success: boolean; tokenLast4: string; warning?: string }>;
+  disconnect: () => Promise<{ success: boolean }>;
+  sync: () => Promise<{ success: boolean; demoUsed: boolean; rows: number }>;
+  dashboard: (days: number) => Promise<{
     empty?: boolean;
     period: { from: string; to: string; days: number };
     kpi: DashboardKpi;
     series: SeriesPoint[];
     expenses: ExpenseItem[];
     topProducts: TopProduct[];
-  }>('dashboard', { params: { days } }),
-  sales: (days: number) => call<{
+  }>;
+  sales: (days: number) => Promise<{
     empty?: boolean;
     period: { from: string; to: string; days: number };
     series: SeriesPoint[];
@@ -77,23 +82,20 @@ export const wbApi = {
     regions: Array<{ region: string; orders: number; revenue: number }>;
     warehouses: Array<{ warehouse: string; orders: number; revenue: number }>;
     kpi: DashboardKpi;
-  }>('sales', { params: { days } }),
-  products: (days: number) => call<{
-    empty?: boolean;
-    products: ProductRow[];
-  }>('products', { params: { days } }),
-  product: (nmId: number, days: number) => call<{
+  }>;
+  products: (days: number) => Promise<{ empty?: boolean; products: ProductRow[] }>;
+  product: (nmId: number, days: number) => Promise<{
     nmId: number;
     series: Array<{ date: string; orders: number; revenue: number; forPay: number }>;
     stocks: Array<{ warehouse: string; qty: number }>;
-  }>('product', { params: { nmId, days } }),
-  ads: (days: number) => call<{
+  }>;
+  ads: (days: number) => Promise<{
     empty?: boolean;
     kpi: { spent: number; adOrders: number; adRevenue: number; drr: number; cpo: number; ctr: number; roi: number };
     series: Array<{ date: string; spent: number; orders: number; revenue: number }>;
     campaigns: Array<{ id: number; name: string; type: string; spent: number; orders: number; revenue: number; drr: number; roi: number; views: number; clicks: number }>;
-  }>('ads', { params: { days } }),
-  forecast: (horizon: number, whatIf?: { adMultiplier?: number; priceMultiplier?: number }) => call<{
+  }>;
+  forecast: (horizon: number, whatIf?: { adMultiplier?: number; priceMultiplier?: number }) => Promise<{
     empty?: boolean;
     horizon: number;
     history: Array<{ date: string; revenue: number; profit: number; orders: number }>;
@@ -106,17 +108,17 @@ export const wbApi = {
     scenarios: Record<'base' | 'optimistic' | 'cautious', { revenue: number; profit: number; orders: number; description: string }>;
     factors: Array<{ name: string; weight: number }>;
     whatIf: { adMultiplier: number; priceMultiplier: number };
-  }>('forecast', {
-    method: 'POST',
-    params: { horizon },
-    body: whatIf || {},
-  }),
-  insights: () => call<{
+  }>;
+  insights: () => Promise<{
     insights: Array<{
-      tag: string; severity: 'success' | 'warning' | 'danger' | 'info';
-      title: string; description?: string;
-      linkPath?: string; metricValue?: number; metricDelta?: number;
+      tag: string;
+      severity: 'success' | 'warning' | 'danger' | 'info';
+      title: string;
+      description?: string;
+      linkPath?: string;
+      metricValue?: number;
+      metricDelta?: number;
     }>;
     count: number;
-  }>('insights'),
+  }>;
 };

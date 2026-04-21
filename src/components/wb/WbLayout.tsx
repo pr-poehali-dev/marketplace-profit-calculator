@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import WbSidebar from './WbSidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { wbApi, WbStatus } from '@/lib/wbApi';
@@ -15,56 +15,22 @@ interface WbContextValue {
 
 export function WbLayout({ children }: { children?: ReactNode }) {
   const auth = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [status, setStatus] = useState<WbStatus | null>(null);
-  const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const reloadStatus = async () => {
-    if (!auth.isAuthenticated) {
-      setStatus(null);
-      setLoading(false);
-      return;
-    }
     try {
       const s = await wbApi.status();
       setStatus(s);
     } catch {
       setStatus(null);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (auth.isLoading) return;
     reloadStatus();
-  }, [auth.isAuthenticated, auth.accessToken, auth.isLoading]);
-
-  // Если не авторизован или не подключён — редирект на /wb (онбординг)
-  useEffect(() => {
-    if (loading || auth.isLoading) return;
-    const isEntry = location.pathname === '/wb' || location.pathname === '/wb/';
-    if (!auth.isAuthenticated && !isEntry) {
-      navigate('/wb', { replace: true });
-      return;
-    }
-    if (auth.isAuthenticated && !status?.connected && !isEntry && location.pathname !== '/wb/settings') {
-      navigate('/wb', { replace: true });
-    }
-  }, [loading, auth.isAuthenticated, auth.isLoading, status, location.pathname]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <Icon name="Loader2" size={20} className="animate-spin" />
-          Загружаем раздел...
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   // Entry page без сайдбара
   if (location.pathname === '/wb' || location.pathname === '/wb/') {
