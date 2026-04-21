@@ -3,7 +3,11 @@ import json
 import os
 import time
 import random
-from datetime import datetime, timedelta, date
+import hashlib
+import hmac
+import re
+import secrets
+from datetime import datetime, timedelta, date, timezone
 
 import jwt
 import psycopg2
@@ -45,6 +49,36 @@ def get_fernet():
     if not key:
         raise RuntimeError('WB_TOKEN_ENCRYPTION_KEY не настроен')
     return Fernet(key.encode() if isinstance(key, str) else key)
+
+
+def hash_password(password: str, salt: str = None) -> str:
+    """PBKDF2 хеш пароля. Формат: pbkdf2$<iterations>$<salt>$<hash>."""
+    if salt is None:
+        salt = secrets.token_hex(16)
+    iterations = 100_000
+    dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), iterations)
+    return f'pbkdf2${iterations}${salt}${dk.hex()}'
+
+
+def verify_password(password: str, stored: str) -> bool:
+    try:
+        _, iters, salt, hash_hex = stored.split('$')
+        expected = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), int(iters))
+        return hmac.compare_digest(expected.hex(), hash_hex)
+    except Exception:
+        return False
+
+
+def create_jwt(user_id: int) -> str:
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.now(timezone.utc) + timedelta(days=30),
+        'iat': datetime.now(timezone.utc),
+    }
+    return jwt.encode(payload, os.environ['JWT_SECRET'], algorithm='HS256')
+
+
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 
 def decrypt_token(encrypted: str) -> str:
@@ -638,22 +672,68 @@ def handler(event: dict, context) -> dict:
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS_HEADERS, 'body': ''}
 
-    user_id = get_user_id(event.get('headers', {}))
-    if not user_id:
-        return json_resp(401, {'error': 'Требуется авторизация'})
-
     method = event.get('httpMethod', 'GET')
     params = event.get('queryStringParameters') or {}
     action = params.get('action', 'status')
 
     dsn = os.environ['DATABASE_URL']
-    schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
-    conn = psycopg2.connect(dsn)
+    schema = os.environ.get('MAIN_DB_SCHEMA', '').strip()
+    conn = psycopg2.connect(dsn, options=f'-c search_path={schema}' if schema else None)
     conn.autocommit = True
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute(f'SET search_path TO {schema}')
 
     try:
+        # Публичные эндпоинты email-авторизации
+        if action in ('email-register', 'email-login') and method == 'POST':
+            body = json.loads(event.get('body') or '{}')
+            email = (body.get('email') or '').strip().lower()
+            password = body.get('password') or ''
+            if not EMAIL_RE.match(email):
+                return json_resp(400, {'error': 'Некорректный email'})
+            if len(password) < 6:
+                return json_resp(400, {'error': 'Пароль должен быть от 6 символов'})
+
+            if action == 'email-register':
+                cur.execute('SELECT id, password_hash FROM users WHERE email = %s', (email,))
+                row = cur.fetchone()
+                if row and row['password_hash']:
+                    return json_resp(400, {'error': 'Email уже зарегистрирован. Войдите.'})
+                ph = hash_password(password)
+                if row:
+                    cur.execute('UPDATE users SET password_hash = %s, last_login_at = CURRENT_TIMESTAMP WHERE id = %s', (ph, row['id']))
+                    uid = row['id']
+                else:
+                    name = (body.get('name') or email.split('@')[0])[:100]
+                    cur.execute(
+                        "INSERT INTO users (email, name, email_verified, password_hash, last_login_at) VALUES (%s, %s, TRUE, %s, CURRENT_TIMESTAMP) RETURNING id",
+                        (email, name, ph),
+                    )
+                    uid = cur.fetchone()['id']
+                token = create_jwt(uid)
+                cur.execute('SELECT id, email, name, avatar_url FROM users WHERE id = %s', (uid,))
+                u = cur.fetchone()
+                return json_resp(200, {
+                    'access_token': token,
+                    'expires_in': 30 * 24 * 3600,
+                    'user': {'id': u['id'], 'email': u['email'], 'name': u['name'], 'avatar_url': u['avatar_url'], 'yandex_id': ''},
+                })
+
+            # email-login
+            cur.execute('SELECT id, email, name, avatar_url, password_hash FROM users WHERE email = %s', (email,))
+            row = cur.fetchone()
+            if not row or not row['password_hash'] or not verify_password(password, row['password_hash']):
+                return json_resp(401, {'error': 'Неверный email или пароль'})
+            cur.execute('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = %s', (row['id'],))
+            token = create_jwt(row['id'])
+            return json_resp(200, {
+                'access_token': token,
+                'expires_in': 30 * 24 * 3600,
+                'user': {'id': row['id'], 'email': row['email'], 'name': row['name'], 'avatar_url': row['avatar_url'], 'yandex_id': ''},
+            })
+
+        user_id = get_user_id(event.get('headers', {}))
+        if not user_id:
+            return json_resp(401, {'error': 'Требуется авторизация'})
         # Статус подключения
         if action == 'status' and method == 'GET':
             cur.execute(

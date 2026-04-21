@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import WbSidebar from './WbSidebar';
-import { useWbAuth } from '@/hooks/useWbAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { wbApi, WbStatus } from '@/lib/wbApi';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ interface WbContextValue {
 }
 
 export function WbLayout({ children }: { children?: ReactNode }) {
-  const auth = useWbAuth();
+  const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [status, setStatus] = useState<WbStatus | null>(null);
@@ -38,12 +38,13 @@ export function WbLayout({ children }: { children?: ReactNode }) {
   };
 
   useEffect(() => {
+    if (auth.isLoading) return;
     reloadStatus();
-  }, [auth.isAuthenticated, auth.accessToken]);
+  }, [auth.isAuthenticated, auth.accessToken, auth.isLoading]);
 
   // Если не авторизован или не подключён — редирект на /wb (онбординг)
   useEffect(() => {
-    if (loading) return;
+    if (loading || auth.isLoading) return;
     const isEntry = location.pathname === '/wb' || location.pathname === '/wb/';
     if (!auth.isAuthenticated && !isEntry) {
       navigate('/wb', { replace: true });
@@ -52,7 +53,7 @@ export function WbLayout({ children }: { children?: ReactNode }) {
     if (auth.isAuthenticated && !status?.connected && !isEntry && location.pathname !== '/wb/settings') {
       navigate('/wb', { replace: true });
     }
-  }, [loading, auth.isAuthenticated, status, location.pathname]);
+  }, [loading, auth.isAuthenticated, auth.isLoading, status, location.pathname]);
 
   if (loading) {
     return (

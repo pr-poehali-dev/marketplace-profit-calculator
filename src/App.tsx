@@ -16,6 +16,7 @@ import WbAds from "./pages/wb/WbAds";
 import WbForecast from "./pages/wb/WbForecast";
 import WbInsights from "./pages/wb/WbInsights";
 import WbSettings from "./pages/wb/WbSettings";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
+        <AuthProvider>
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth/yandex/callback" element={<YandexCallback />} />
           <Route path="/wb" element={<WbLayout />}>
@@ -41,6 +43,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

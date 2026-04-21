@@ -3,6 +3,7 @@
     {"name": "OPTIONS CORS", "method": "OPTIONS", "path": "/", "expectedStatus": 200},
     {"name": "GET status без auth", "method": "GET", "path": "/?action=status", "expectedStatus": 401},
     {"name": "POST connect без auth", "method": "POST", "path": "/?action=connect", "body": {"token": "abc"}, "expectedStatus": 401},
-    {"name": "GET dashboard без auth", "method": "GET", "path": "/?action=dashboard&days=30", "expectedStatus": 401}
+    {"name": "Email login с пустыми данными", "method": "POST", "path": "/?action=email-login", "body": {"email": "bad", "password": "123"}, "expectedStatus": 400},
+    {"name": "Email login неверный пароль", "method": "POST", "path": "/?action=email-login", "body": {"email": "nouser@example.com", "password": "123456"}, "expectedStatus": 401}
   ]
 }

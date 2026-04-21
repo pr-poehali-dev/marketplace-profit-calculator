@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useWbAuth } from '@/hooks/useWbAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { wbApi, WbStatus } from '@/lib/wbApi';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import EmailAuthDialog from '@/components/wb/EmailAuthDialog';
 import { toast } from 'sonner';
 
 interface Ctx { status: WbStatus | null; reloadStatus: () => Promise<void> }
 
 export default function WbIntro() {
-  const auth = useWbAuth();
+  const auth = useAuth();
   const navigate = useNavigate();
   const ctx = useOutletContext<Ctx>();
   const [open, setOpen] = useState(false);
@@ -20,6 +21,10 @@ export default function WbIntro() {
   const [syncing, setSyncing] = useState(false);
 
   const handleConnect = async () => {
+    if (!auth.isAuthenticated) {
+      toast.error('Сначала войдите по email или через Яндекс');
+      return;
+    }
     if (token.trim().length < 20) {
       toast.error('Токен слишком короткий');
       return;
@@ -45,7 +50,7 @@ export default function WbIntro() {
 
   const handleDemoSync = async () => {
     if (!auth.isAuthenticated) {
-      await auth.login();
+      await auth.loginYandex();
       return;
     }
     // Быстрый вход в демо: подключим фейковый токен (длиной >=20) и синхронизуем
@@ -71,6 +76,17 @@ export default function WbIntro() {
     // Уже подключён — сразу на дашборд
     navigate('/wb/dashboard', { replace: true });
     return null;
+  }
+
+  if (auth.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Icon name="Loader2" size={16} className="animate-spin" />
+          Проверяем авторизацию...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -106,9 +122,9 @@ export default function WbIntro() {
             <div className="mt-6 max-w-md mx-auto rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3 text-left">
               <Icon name="Info" size={18} className="text-primary shrink-0 mt-0.5" />
               <div className="text-sm">
-                <div className="font-medium">Сначала войдите через Яндекс</div>
+                <div className="font-medium">Сначала войдите в аккаунт</div>
                 <div className="text-muted-foreground mt-0.5">
-                  Это нужно, чтобы ваш токен WB хранился в зашифрованном виде именно для вашего аккаунта.
+                  Это нужно, чтобы ваш токен WB хранился в зашифрованном виде именно для вас.
                 </div>
               </div>
             </div>
@@ -116,10 +132,20 @@ export default function WbIntro() {
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {!auth.isAuthenticated ? (
-              <Button size="lg" onClick={auth.login} className="gap-2">
-                <Icon name="LogIn" size={18} />
-                Войти через Яндекс
-              </Button>
+              <>
+                <EmailAuthDialog
+                  trigger={
+                    <Button size="lg" className="gap-2">
+                      <Icon name="Mail" size={18} />
+                      Войти по email
+                    </Button>
+                  }
+                />
+                <Button size="lg" variant="outline" onClick={auth.loginYandex} className="gap-2">
+                  <Icon name="LogIn" size={18} />
+                  Войти через Яндекс
+                </Button>
+              </>
             ) : (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
