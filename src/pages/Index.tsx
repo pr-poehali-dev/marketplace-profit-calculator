@@ -10,8 +10,9 @@ import ChartsTab from '@/components/calculator/ChartsTab';
 import HistoryTab from '@/components/calculator/HistoryTab';
 import { TermsTab } from '@/components/calculator/TermsAndSupport';
 import AIConsultant from '@/components/calculator/AIConsultant';
-import { useYandexAuth } from '@/components/extensions/yandex-auth/useYandexAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { YandexLoginButton } from '@/components/extensions/yandex-auth/YandexLoginButton';
+import EmailAuthDialog from '@/components/wb/EmailAuthDialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
@@ -23,7 +24,6 @@ import {
 } from '@/components/ui/dialog';
 import { exportToExcel as exportToExcelUtil } from '@/utils/excelExport';
 
-const AUTH_URL = 'https://functions.poehali.dev/2e056aab-4184-456d-8c5a-84a93c8371be';
 const REPORTS_URL = 'https://functions.poehali.dev/9662ad24-ec22-4880-95e2-3eadedb48c9b';
 
 const STORAGE_KEY = 'finplace_data';
@@ -73,14 +73,16 @@ const Index = () => {
   const [cloudSynced, setCloudSynced] = useState(false);
   const navigate = useNavigate();
 
-  const auth = useYandexAuth({
-    apiUrls: {
-      authUrl: `${AUTH_URL}?action=auth-url`,
-      callback: `${AUTH_URL}?action=callback`,
-      refresh: `${AUTH_URL}?action=refresh`,
-      logout: `${AUTH_URL}?action=logout`,
-    },
-  });
+  const authCtx = useAuth();
+  const auth = {
+    user: authCtx.user,
+    isAuthenticated: authCtx.isAuthenticated,
+    isLoading: authCtx.isLoading,
+    accessToken: authCtx.accessToken,
+    login: authCtx.loginYandex,
+    logout: authCtx.logout,
+    getAuthHeader: authCtx.getAuthHeader,
+  };
 
   useEffect(() => {
     saveToStorage(products, calculations);
@@ -376,7 +378,7 @@ const Index = () => {
                         </Avatar>
                         <div>
                           <p className="text-lg font-semibold">{auth.user.name || 'Пользователь'}</p>
-                          <p className="text-sm text-muted-foreground">Вход через Яндекс</p>
+                          <p className="text-sm text-muted-foreground">{auth.user.yandex_id ? 'Вход через Яндекс' : 'Вход по email'}</p>
                         </div>
                       </div>
 
@@ -423,7 +425,22 @@ const Index = () => {
                 </Dialog>
               ) : (
                 <>
-                  <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} buttonText="Войти" className="md:hidden text-sm px-3" />
+                  <EmailAuthDialog
+                    trigger={
+                      <Button variant="outline" size="icon" className="md:hidden h-9 w-9" title="Войти по email">
+                        <Icon name="Mail" size={18} />
+                      </Button>
+                    }
+                  />
+                  <EmailAuthDialog
+                    trigger={
+                      <Button variant="outline" className="hidden md:flex gap-2">
+                        <Icon name="Mail" size={18} />
+                        Войти по email
+                      </Button>
+                    }
+                  />
+                  <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} buttonText="Яндекс" className="md:hidden text-sm px-3" />
                   <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} className="hidden md:flex" />
                 </>
               )}
