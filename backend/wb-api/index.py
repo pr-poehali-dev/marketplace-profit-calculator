@@ -45,10 +45,19 @@ def get_user_id(headers):
 
 
 def get_fernet():
-    key = os.environ.get('WB_TOKEN_ENCRYPTION_KEY', '')
-    if not key:
-        raise RuntimeError('WB_TOKEN_ENCRYPTION_KEY не настроен')
-    return Fernet(key.encode() if isinstance(key, str) else key)
+    """Возвращает Fernet. Использует WB_TOKEN_ENCRYPTION_KEY если он валиден (32 байта base64),
+    иначе выводит ключ из JWT_SECRET (стабильно и не требует ручной настройки)."""
+    import base64
+    raw = os.environ.get('WB_TOKEN_ENCRYPTION_KEY', '').strip()
+    if raw:
+        try:
+            return Fernet(raw.encode() if isinstance(raw, str) else raw)
+        except Exception:
+            pass  # fallback ниже
+    seed = os.environ.get('JWT_SECRET', 'fallback-secret-please-set-jwt-secret').encode()
+    digest = hashlib.sha256(seed + b'|wb-fernet-v1').digest()
+    derived = base64.urlsafe_b64encode(digest)
+    return Fernet(derived)
 
 
 def hash_password(password: str, salt: str = None) -> str:
