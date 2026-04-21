@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -70,6 +71,7 @@ const Index = () => {
 
   const [calculations, setCalculations] = useState<CalculationResult[]>(stored.calculations);
   const [cloudSynced, setCloudSynced] = useState(false);
+  const navigate = useNavigate();
 
   const auth = useYandexAuth({
     apiUrls: {
@@ -278,6 +280,23 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5 md:gap-2">
+              <Button
+                onClick={() => navigate('/wb')}
+                size="icon"
+                className="md:hidden h-9 w-9 bg-gradient-to-br from-primary to-[hsl(262_83%_58%)] hover:opacity-90 text-primary-foreground shadow-sm"
+                title="WB Аналитика"
+              >
+                <Icon name="BarChart3" size={18} />
+              </Button>
+              <Button
+                onClick={() => navigate('/wb')}
+                className="hidden md:flex bg-gradient-to-r from-primary to-[hsl(262_83%_58%)] hover:opacity-90 text-primary-foreground shadow-sm gap-2"
+              >
+                <Icon name="BarChart3" size={18} />
+                WB Аналитика
+                <span className="text-[10px] font-semibold bg-white/20 px-1.5 py-0.5 rounded">NEW</span>
+              </Button>
+
               <Button onClick={exportToExcel} variant="outline" disabled={calculations.length === 0} size="icon" className="md:hidden h-9 w-9">
                 <Icon name="Download" size={18} />
               </Button>

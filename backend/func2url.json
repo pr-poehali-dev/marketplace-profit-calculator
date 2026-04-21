@@ -1,4 +1,5 @@
 {
+  "wb-api": "https://functions.poehali.dev/a64253f4-7852-4f3b-9c5a-03b2369b9296",
   "user-reports": "https://functions.poehali.dev/9662ad24-ec22-4880-95e2-3eadedb48c9b",
   "yandex-auth-yandex-auth": "https://functions.poehali.dev/2e056aab-4184-456d-8c5a-84a93c8371be",
   "ai-consultant": "https://functions.poehali.dev/4f6034d7-9cad-4291-8c14-8e89fc8ff9d5"
