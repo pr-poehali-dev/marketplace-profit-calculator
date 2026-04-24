@@ -8,9 +8,17 @@ import Icon from '@/components/ui/icon';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export default function EmailAuthDialog({ trigger }: { trigger: React.ReactNode }) {
+interface EmailAuthDialogProps {
+  trigger: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
+}
+
+export default function EmailAuthDialog({ trigger, open: openProp, onOpenChange }: EmailAuthDialogProps) {
   const { loginEmail, registerEmail } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [openInner, setOpenInner] = useState(false);
+  const open = openProp !== undefined ? openProp : openInner;
+  const setOpen = onOpenChange ?? setOpenInner;
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

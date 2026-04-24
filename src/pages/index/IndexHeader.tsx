@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -10,9 +11,55 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { YandexLoginButton } from '@/components/extensions/yandex-auth/YandexLoginButton';
 import EmailAuthDialog from '@/components/wb/EmailAuthDialog';
 import type { IndexData } from './useIndexData';
+
+function AccountDropdown({ auth }: { auth: IndexData['auth'] }) {
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
+
+  return (
+    <>
+      <DropdownMenu open={dropOpen} onOpenChange={setDropOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Icon name="User" size={16} />
+            <span className="hidden sm:inline">Аккаунт</span>
+            <Icon name="ChevronDown" size={14} className="text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64 p-3 flex flex-col gap-2">
+          <p className="text-xs text-muted-foreground px-1 pb-1">Выберите способ входа</p>
+          <YandexLoginButton
+            onClick={() => { setDropOpen(false); auth.login(); }}
+            isLoading={auth.isLoading}
+            className="w-full justify-start"
+          />
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={() => { setDropOpen(false); setEmailOpen(true); }}
+          >
+            <Icon name="Mail" size={16} />
+            Войти по email
+          </Button>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <EmailAuthDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        trigger={<span className="hidden" />}
+      />
+    </>
+  );
+}
 
 interface Props {
   auth: IndexData['auth'];
@@ -178,25 +225,7 @@ export default function IndexHeader({ auth, calculations, exportToExcel }: Props
                 </DialogContent>
               </Dialog>
             ) : (
-              <>
-                <EmailAuthDialog
-                  trigger={
-                    <Button variant="outline" size="icon" className="md:hidden h-9 w-9" title="Войти по email">
-                      <Icon name="Mail" size={18} />
-                    </Button>
-                  }
-                />
-                <EmailAuthDialog
-                  trigger={
-                    <Button variant="outline" className="hidden md:flex gap-2">
-                      <Icon name="Mail" size={18} />
-                      Войти по email
-                    </Button>
-                  }
-                />
-                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} buttonText="Яндекс" className="md:hidden text-sm px-3" />
-                <YandexLoginButton onClick={auth.login} isLoading={auth.isLoading} className="hidden md:flex" />
-              </>
+              <AccountDropdown auth={auth} />
             )}
           </div>
         </div>
