@@ -11,11 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { YandexLoginButton } from '@/components/extensions/yandex-auth/YandexLoginButton';
 import EmailAuthDialog from '@/components/wb/EmailAuthDialog';
 import type { IndexData } from './useIndexData';
@@ -26,15 +22,15 @@ function AccountDropdown({ auth }: { auth: IndexData['auth'] }) {
 
   return (
     <>
-      <DropdownMenu open={dropOpen} onOpenChange={setDropOpen}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={dropOpen} onOpenChange={setDropOpen}>
+        <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2">
             <Icon name="User" size={16} />
             <span className="hidden sm:inline">Аккаунт</span>
             <Icon name="ChevronDown" size={14} className="text-muted-foreground" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64 p-3 flex flex-col gap-2">
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-64 p-3 flex flex-col gap-2">
           <p className="text-xs text-muted-foreground px-1 pb-1">Выберите способ входа</p>
           <YandexLoginButton
             onClick={() => { setDropOpen(false); auth.login(); }}
@@ -49,8 +45,8 @@ function AccountDropdown({ auth }: { auth: IndexData['auth'] }) {
             <Icon name="Mail" size={16} />
             Войти по email
           </Button>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
 
       <EmailAuthDialog
         open={emailOpen}
