@@ -24,10 +24,10 @@ function AccountDropdown({ auth }: { auth: IndexData['auth'] }) {
     <>
       <Popover open={dropOpen} onOpenChange={setDropOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button variant="default" className="gap-2">
             <Icon name="User" size={16} />
             <span className="hidden sm:inline">Аккаунт</span>
-            <Icon name="ChevronDown" size={14} className="text-muted-foreground" />
+            <Icon name="ChevronDown" size={14} className="opacity-70" />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64 p-3 flex flex-col gap-2">
