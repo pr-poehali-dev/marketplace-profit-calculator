@@ -9,7 +9,9 @@ function seeded(seed: number) {
   };
 }
 
-const rand = seeded(42);
+// Каждый раз создаём новый генератор с фиксированным seed — данные всегда одинаковые
+function makeRand() { return seeded(42); }
+const rand = makeRand();
 
 const PRODUCTS = [
   { nmId: 184523001, article: 'FP-TSHIRT-BLK-M', subject: 'Футболка базовая', category: 'Одежда', brand: 'FinPlace Basic', price: 1290 },
@@ -28,7 +30,8 @@ const REGIONS = ['Москва', 'Санкт-Петербург', 'Екатер�
 const WAREHOUSES = ['Коледино', 'Электросталь', 'Казань', 'Краснодар', 'Подольск', 'Тула'];
 
 function buildSeries(days: number) {
-  const today = new Date();
+  rand = makeRand(); // сброс seed — данные всегда одинаковые
+  const today = new Date('2026-04-25'); // фиксированная дата — даты не меняются при обновлении
   const series: Array<{ date: string; revenue: number; profit: number; orders: number; adSpent: number }> = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
@@ -37,7 +40,7 @@ function buildSeries(days: number) {
     const weekBoost = isWeekend ? 1.3 : 1.0;
     const trend = 1 + (days - i) / days * 0.35;
     const noise = 0.8 + rand() * 0.5;
-    const base = 95000 * weekBoost * trend * noise;
+    const base = 113000 * weekBoost * trend * noise; // ~3.7млн за 30 дней
     const revenue = Math.round(base);
     const profit = Math.round(revenue * (0.22 + rand() * 0.08));
     const orders = Math.round(revenue / (1800 + rand() * 600));
@@ -78,25 +81,27 @@ function buildExpenses(revenue: number, adSpent: number) {
 }
 
 function buildTopProducts() {
+  const r = makeRand();
   return PRODUCTS.slice(0, 5).map((p, i) => {
     const multiplier = (5 - i) * 0.8 + 1;
     const orders = Math.round((120 - i * 18) * multiplier);
     const revenue = Math.round(p.price * orders * 0.92);
-    const margin = 18 + rand() * 18;
+    const margin = 18 + r() * 18;
     const profit = Math.round(revenue * margin / 100);
     return { nmId: p.nmId, article: p.article, subject: p.subject, brand: p.brand, revenue, profit, margin, orders };
   });
 }
 
 function buildProductsFull(days: number) {
+  const r = makeRand();
   return PRODUCTS.map((p, i) => {
     const k = 1 - i * 0.08;
     const orders = Math.max(8, Math.round((150 - i * 14) * (days / 30) * k));
-    const revenue = Math.round(p.price * orders * (0.88 + rand() * 0.1));
-    const margin = 8 + rand() * 28;
+    const revenue = Math.round(p.price * orders * (0.88 + r() * 0.1));
+    const margin = 8 + r() * 28;
     const profit = Math.round(revenue * margin / 100);
-    const drr = 6 + rand() * 20;
-    const stock = Math.round(50 + rand() * 250);
+    const drr = 6 + r() * 20;
+    const stock = Math.round(50 + r() * 250);
     const turnover = Math.round(stock / (orders / days) * 10) / 10;
     const status: 'star' | 'ok' | 'warn' = margin > 25 ? 'star' : margin < 14 ? 'warn' : 'ok';
     return { ...p, revenue, profit, margin, orders, drr, stock, turnover, status };
@@ -126,12 +131,13 @@ function buildWarehouses(totalOrders: number) {
 }
 
 function buildAds(days: number) {
+  const rAds = makeRand();
   const series = buildSeries(days);
   const adSeries = series.map(s => ({
     date: s.date,
     spent: s.adSpent,
     orders: Math.round(s.orders * 0.35),
-    revenue: Math.round(s.adSpent * (2.8 + rand() * 1.5)),
+    revenue: Math.round(s.adSpent * (2.8 + rAds() * 1.5)),
   }));
   const spent = adSeries.reduce((a, b) => a + b.spent, 0);
   const adOrders = adSeries.reduce((a, b) => a + b.orders, 0);
@@ -143,6 +149,7 @@ function buildAds(days: number) {
   const ctr = views ? (clicks / views) * 100 : 0;
   const roi = spent ? ((adRevenue - spent) / spent) * 100 : 0;
 
+  const rCamp = makeRand();
   const campaigns = [
     { id: 901, name: 'Авто — Футболка базовая', type: 'auto', nmId: 184523001 },
     { id: 902, name: 'Поиск — Худи оверсайз', type: 'search', nmId: 184523002 },
@@ -153,7 +160,7 @@ function buildAds(days: number) {
     { id: 907, name: 'Авто — Платье коктейль', type: 'auto', nmId: 184523008 },
   ].map((c, i) => {
     const s = Math.round(spent * (0.27 - i * 0.033));
-    const r = Math.round(s * (1.5 + rand() * 2.5));
+    const r = Math.round(s * (1.5 + rCamp() * 2.5));
     const o = Math.round(r / 2400);
     const v = Math.round(s / 5);
     const cl = Math.round(v * 0.05);
@@ -174,12 +181,13 @@ function buildAds(days: number) {
 }
 
 function buildForecast(horizon: number, adMult = 1, priceMult = 1) {
+  const rForecast = makeRand();
   const history = buildSeries(60).map(s => ({ date: s.date, revenue: s.revenue, profit: s.profit, orders: s.orders }));
   const lastRev = history[history.length - 1].revenue;
   const lastProfit = history[history.length - 1].profit;
   const lastOrders = history[history.length - 1].orders;
 
-  const today = new Date();
+  const today = new Date('2026-04-25');
   const forecast = [];
   for (let i = 1; i <= horizon; i++) {
     const d = new Date(today);
@@ -187,7 +195,7 @@ function buildForecast(horizon: number, adMult = 1, priceMult = 1) {
     const growth = 1 + i * 0.006;
     const weekday = d.getDay();
     const seasonal = weekday === 0 || weekday === 6 ? 1.22 : 1.0;
-    const noise = 0.93 + rand() * 0.14;
+    const noise = 0.93 + rForecast() * 0.14;
 
     const baseR = Math.round(lastRev * growth * seasonal * noise * priceMult);
     const baseP = Math.round(lastProfit * growth * seasonal * noise * priceMult - (adMult - 1) * lastRev * 0.05);
@@ -343,20 +351,22 @@ export const wbMock = {
   products: (days: number) => delay({ products: buildProductsFull(days) }),
 
   product: (nmId: number, days: number) => {
+    const rProd = makeRand();
     const series = buildSeries(days).map(s => ({
       date: s.date,
-      orders: Math.max(1, Math.round(s.orders / 12 + rand() * 5)),
-      revenue: Math.round(s.revenue / 10 + rand() * 5000),
-      forPay: Math.round((s.revenue / 10 + rand() * 5000) * 0.82),
+      orders: Math.max(1, Math.round(s.orders / 12 + rProd() * 5)),
+      revenue: Math.round(s.revenue / 10 + rProd() * 5000),
+      forPay: Math.round((s.revenue / 10 + rProd() * 5000) * 0.82),
     }));
+    const rStocks = makeRand();
     return delay({
       nmId,
       series,
       stocks: [
-        { warehouse: 'Коледино', qty: Math.round(50 + rand() * 100) },
-        { warehouse: 'Электросталь', qty: Math.round(30 + rand() * 80) },
-        { warehouse: 'Казань', qty: Math.round(20 + rand() * 60) },
-        { warehouse: 'Краснодар', qty: Math.round(15 + rand() * 50) },
+        { warehouse: 'Коледино', qty: Math.round(50 + rStocks() * 100) },
+        { warehouse: 'Электросталь', qty: Math.round(30 + rStocks() * 80) },
+        { warehouse: 'Казань', qty: Math.round(20 + rStocks() * 60) },
+        { warehouse: 'Краснодар', qty: Math.round(15 + rStocks() * 50) },
       ],
     });
   },
