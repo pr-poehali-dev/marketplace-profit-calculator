@@ -11,7 +11,7 @@ function seeded(seed: number) {
 
 // Каждый раз создаём новый генератор с фиксированным seed — данные всегда одинаковые
 function makeRand() { return seeded(42); }
-const rand = makeRand();
+let rand = makeRand();
 
 const PRODUCTS = [
   { nmId: 184523001, article: 'FP-TSHIRT-BLK-M', subject: 'Футболка базовая', category: 'Одежда', brand: 'FinPlace Basic', price: 1290 },
