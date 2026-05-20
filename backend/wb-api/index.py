@@ -795,21 +795,17 @@ def handler(event: dict, context) -> dict:
             if not row:
                 return json_resp(400, {'error': 'Кабинет не подключён'})
             cur.execute("UPDATE wb_accounts SET status='syncing', sync_progress=10 WHERE user_id=%s", (user_id,))
-            real_count = 0
             try:
                 token = decrypt_token(row['token_encrypted'])
                 real_count = sync_real_wb(cur, user_id, token)
-            except Exception:
-                real_count = 0
-            demo_used = False
-            if real_count < 10:
-                generate_demo_data(cur, user_id)
-                demo_used = True
+            except Exception as e:
+                cur.execute("UPDATE wb_accounts SET status='error', sync_progress=0 WHERE user_id=%s", (user_id,))
+                return json_resp(500, {'error': f'Ошибка синхронизации: {e}'})
             cur.execute(
                 "UPDATE wb_accounts SET status='connected', sync_progress=100, last_sync_at=CURRENT_TIMESTAMP WHERE user_id=%s",
                 (user_id,),
             )
-            return json_resp(200, {'success': True, 'demoUsed': demo_used, 'rows': real_count})
+            return json_resp(200, {'success': True, 'rows': real_count})
 
         # Проверка что данные есть
         cur.execute('SELECT COUNT(*) AS c FROM wb_sales WHERE user_id=%s', (user_id,))

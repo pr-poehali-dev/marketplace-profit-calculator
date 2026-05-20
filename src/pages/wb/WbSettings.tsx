@@ -23,7 +23,7 @@ export default function WbSettings() {
     setSyncing(true);
     try {
       const r = await wbApi.sync();
-      toast.success(r.demoUsed ? 'Загружены демо-данные' : `Синхронизация завершена (${r.rows} строк)`);
+      toast.success(`Синхронизация завершена (${r.rows} строк)`);
       await ctx.reloadStatus();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Ошибка');
